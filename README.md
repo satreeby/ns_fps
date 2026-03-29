@@ -2,6 +2,8 @@
 
 High-performance Farthest Point Sampling (FPS) implementation based on Morton-coded neighbor search and multi-level caching.
 
+![image](figs/ns_fps.png)
+
 ## Features
 
 - **Spatial Adaptivity**: Independent granularity configuration per dimension (e.g., X:32, Y:16, Z:8)

@@ -338,7 +338,7 @@ def benchmark_speed():
         print(f"{n:>8} | {k:>8} | {py_time:>12.2f} | {cpp_time:>10.2f} | {speedup:>8.1f}x")
 
 
-def visualize_distance_decay(save_path="results/fps_decay.png"):
+def visualize_distance_decay(save_path="figs/fps_decay.png"):
     """可视化距离衰减曲线"""
     try:
         import matplotlib.pyplot as plt
