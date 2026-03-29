@@ -7,7 +7,7 @@ High-performance Farthest Point Sampling (FPS) implementation based on Morton-co
 ## Features
 
 - **Spatial Adaptivity**: Independent granularity configuration per dimension (e.g., X:32, Y:16, Z:8)
-- **Multi-Level Caching**: 16-ary tree structure for O(1) global farthest point query
+- **Multi-Level Caching**: 16-1 tree structure for global farthest point query
 - **Incremental Update**: Only update affected spatial blocks instead of full traversal
 - **Python Binding**: Complete pybind11 interface with seamless NumPy integration
 
