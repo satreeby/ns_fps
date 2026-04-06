@@ -56,6 +56,8 @@ indices = yf.fps(points, n_samples=1000, range=space_range)
 sampled_points = points[indices]
 ```
 
+You can also use `semantickitti_example.py` to verify the algorithm's performance on the real SemanticKITTI dataset.
+
 ## Core Concepts
 
 ### SpaceRange
