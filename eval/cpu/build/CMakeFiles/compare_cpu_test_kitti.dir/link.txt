@@ -1,0 +1,1 @@
+/usr/bin/c++ CMakeFiles/compare_cpu_test_kitti.dir/compare_cpu_test_kitti.cpp.o -o compare_cpu_test_kitti  libyuezu_fps_cpu.a 

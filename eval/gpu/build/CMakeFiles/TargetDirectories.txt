@@ -1,0 +1,6 @@
+/root/yuezu/src_gpu/build/CMakeFiles/yuezu_fps_gpu_optimized.dir
+/root/yuezu/src_gpu/build/CMakeFiles/test_gpu_fps_optimized.dir
+/root/yuezu/src_gpu/build/CMakeFiles/compare_test_optimized.dir
+/root/yuezu/src_gpu/build/CMakeFiles/compare_test_kitti.dir
+/root/yuezu/src_gpu/build/CMakeFiles/edit_cache.dir
+/root/yuezu/src_gpu/build/CMakeFiles/rebuild_cache.dir
