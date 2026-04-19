@@ -1,2 +1,0 @@
-/usr/bin/ar qc libyuezu_fps_cpu.a CMakeFiles/yuezu_fps_cpu.dir/yuezu_fps.cpp.o
-/usr/bin/ranlib libyuezu_fps_cpu.a

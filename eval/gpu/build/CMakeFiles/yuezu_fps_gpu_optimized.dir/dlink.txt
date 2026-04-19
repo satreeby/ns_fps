@@ -1,1 +1,0 @@
-/usr/local/cuda/bin/nvcc -forward-unknown-to-host-compiler  --generate-code=arch=compute_90,code=[compute_90,sm_90] -Xcompiler=-fPIC -Wno-deprecated-gpu-targets -shared -dlink CMakeFiles/yuezu_fps_gpu_optimized.dir/yuezu_fps_gpu_optimized.cu.o -o CMakeFiles/yuezu_fps_gpu_optimized.dir/cmake_device_link.o   -lcudadevrt -lcudart_static -lrt -lpthread -ldl 

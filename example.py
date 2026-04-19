@@ -2,46 +2,46 @@ import numpy as np
 import yuezu_fps.yuezu_fps_module as yf
 import time
 
-# =============================================================================
-# 方式1：手动指定范围 + 粒度（已知点云范围时使用）
-# =============================================================================
+# ==============================================================================
+# 🎯 Method 1: Manual range + granularity (when point cloud range is known)
+# ==============================================================================
 
-def fps_manual(points, n_samples, 
+def fps_manual(points, n_samples,
                min_x, max_x, min_y, max_y, min_z, max_z,
                x_blocks=16, y_blocks=16, z_blocks=16):
     """
-    手动指定空间范围和粒度进行FPS采样
-    
-    适用于：已知点云范围，想精确控制空间分割粒度
+    Manually specify spatial range and granularity for FPS sampling
+
+    Recommended for: Known point cloud range, precise control over spatial division
     """
-    # 创建 SpaceRange
+    # Create SpaceRange
     space_range = yf.make_range(
         float(min_x), float(max_x),
         float(min_y), float(max_y),
         float(min_z), float(max_z),
         x_blocks, y_blocks, z_blocks
     )
-    
-    # 执行 FPS
+
+    # Execute FPS
     return yf.fps(points, n_samples, space_range)
 
 
-# =============================================================================
-# 方式2：自适应计算范围（便捷辅助函数）
-# =============================================================================
+# ==============================================================================
+# 🤖 Method 2: Adaptive range calculation (convenient helper function)
+# ==============================================================================
 
 def fps_auto(points, n_samples, x_blocks=16, y_blocks=16, z_blocks=16):
     """
-    自动计算点云范围，使用指定粒度进行FPS采样
-    
-    适用于：快速使用，不关心精确范围
+    Automatically calculate point cloud range, perform FPS sampling with specified granularity
+
+    Recommended for: Quick usage without caring about precise range
     """
-    # 自动统计范围
+    # Auto-calculate range
     min_x, max_x = points[:, 0].min(), points[:, 0].max()
     min_y, max_y = points[:, 1].min(), points[:, 1].max()
     min_z, max_z = points[:, 2].min(), points[:, 2].max()
-    
-    # 添加边距
+
+    # Add margins
     eps = 1e-4
     start_time = time.perf_counter()
     result = fps_manual(points, n_samples,
@@ -50,36 +50,35 @@ def fps_auto(points, n_samples, x_blocks=16, y_blocks=16, z_blocks=16):
                       min_z - eps, max_z + eps,
                       x_blocks, y_blocks, z_blocks)
     end_time = time.perf_counter()
-    print("time:", end_time-start_time)
+    print("⏱️  Time:", end_time-start_time)
     return result
 
 
-# =============================================================================
-# 使用示例
-# =============================================================================
+# ==============================================================================
+# 📖 Usage Examples
+# ==============================================================================
 
 if __name__ == "__main__":
-    # 生成测试点云
+    # 🧪 Generate test point cloud
     np.random.seed(42)
     points = np.random.randn(10000, 3).astype(np.float32) * 50
-    pc_kitti = np.loadtxt('../../code/yuezu/yuezu_fps/data/kitty/sequence_1_frame_7.txt').astype(np.float32)
 
     n_samples = 1000
-    
-    print(f"点云: {len(points)} 点")
-    print(f"实际范围: X[{points[:,0].min():.1f},{points[:,0].max():.1f}], "
+
+    print(f"🎯 Point Cloud: {len(points)} points")
+    print(f"📏 Actual Range: X[{points[:,0].min():.1f},{points[:,0].max():.1f}], "
           f"Y[{points[:,1].min():.1f},{points[:,1].max():.1f}], "
           f"Z[{points[:,2].min():.1f},{points[:,2].max():.1f}]")
-    
-    # ---------------------------------------------------------
-    # 示例1：手动指定范围 + 粒度（推荐，已知范围时使用）
-    # ---------------------------------------------------------
+
+    # --------------------------------------------------------------------------
+    # 📌 Example 1: Manual range + granularity (recommended when range is known)
+    # --------------------------------------------------------------------------
     print("\n" + "=" * 60)
-    print("示例1：手动指定范围和粒度")
+    print("📌 Example 1: Manual range and granularity")
     print("=" * 60)
-    
-    # 已知点云范围是 [-200, 200] x [-100, 100] x [-50, 50]
-    # 配置粒度：X细(32块), Y中(16块), Z粗(8块)
+
+    # Known point cloud range is [-200, 200] x [-100, 100] x [-50, 50]
+    # Configure granularity: X fine (32 blocks), Y medium (16 blocks), Z coarse (8 blocks)
     indices = fps_manual(
         points, n_samples,
         min_x=-200, max_x=200,
@@ -87,47 +86,42 @@ if __name__ == "__main__":
         min_z=-50, max_z=50,
         x_blocks=32, y_blocks=16, z_blocks=8
     )
-    
-    print(f"配置范围: [-200,200]×[-100,100]×[-50,50]")
-    print(f"配置粒度: 32×16×8 = {32*16*8} 块")
-    print(f"采样结果: {len(indices)} 点")
-    print(f"前10个索引: {indices[:10]}")
-    
-    # ---------------------------------------------------------
-    # 示例2：自适应计算范围（快速使用）
-    # ---------------------------------------------------------
+
+    print(f"⚙️  Configured Range: [-200,200]×[-100,100]×[-50,50]")
+    print(f"🧱 Granularity: 32×16×8 = {32*16*8} blocks")
+    print(f"📊 Sample Result: {len(indices)} points")
+    print(f"📈 First 10 indices: {indices[:10]}")
+
+    # --------------------------------------------------------------------------
+    # 🧮 Example 2: Adaptive range calculation (quick usage)
+    # --------------------------------------------------------------------------
     print("\n" + "=" * 60)
-    print("示例2：自适应计算范围")
+    print("🧮 Example 2: Adaptive range calculation")
     print("=" * 60)
-    
-    k = int(16384*1)                 # 想抽多少行
-    rng = np.random.default_rng(seed=42)   # 推荐新 Generator，可复现
-    idx = rng.choice(pc_kitti.shape[0], size=k, replace=False)  # 随机下标
-    # pc_kitti = pc_kitti[idx]
-    print(pc_kitti.shape)
-    indices = fps_auto(pc_kitti, int(pc_kitti.shape[0]*0.25), x_blocks=128, y_blocks=128, z_blocks=2)
-    
-    print(f"自动计算范围并采样")
-    print(f"采样结果: {len(indices)} 点")
-    
-    # ---------------------------------------------------------
-    # 示例3：直接使用底层 API（最灵活）
-    # ---------------------------------------------------------
+
+    indices = fps_auto(points, n_samples, x_blocks=32, y_blocks=16, z_blocks=8)
+
+    print(f"🔍 Automatic range calculation and sampling")
+    print(f"📊 Sample Result: {len(indices)} points")
+
+    # --------------------------------------------------------------------------
+    # 🔧 Example 3: Direct use of low-level API (most flexible)
+    # --------------------------------------------------------------------------
     print("\n" + "=" * 60)
-    print("示例3：直接使用底层 API")
+    print("🔧 Example 3: Direct use of low-level API")
     print("=" * 60)
-    
-    # 创建 SpaceRange 对象
+
+    # Create SpaceRange object
     space_range = yf.make_range(-150, 150, -150, 150, -150, 150, 16, 16, 16)
-    
-    # 查看配置
-    print(f"SpaceRange: X[{space_range.min_x},{space_range.max_x}], "
+
+    # Check configuration
+    print(f"📍 SpaceRange: X[{space_range.min_x},{space_range.max_x}], "
           f"Y[{space_range.min_y},{space_range.max_y}], "
           f"Z[{space_range.min_z},{space_range.max_z}]")
-    print(f"粒度: {space_range.x_blocks}×{space_range.y_blocks}×{space_range.z_blocks}")
-    print(f"编码: {space_range.total_bits()} bits")
-    
-    # 执行 FPS
+    print(f"⚙️  Granularity: {space_range.x_blocks}×{space_range.y_blocks}×{space_range.z_blocks}")
+    print(f"🔢 Encoding: {space_range.total_bits()} bits")
+
+    # Execute FPS
     indices = yf.fps(points, n_samples, space_range)
-    print(f"采样结果: {len(indices)} 点")
+    print(f"📊 Sample Result: {len(indices)} points")
 

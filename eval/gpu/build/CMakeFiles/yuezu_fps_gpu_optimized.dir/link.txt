@@ -1,3 +1,0 @@
-/usr/bin/ar qc libyuezu_fps_gpu_optimized.a CMakeFiles/yuezu_fps_gpu_optimized.dir/yuezu_fps_gpu_optimized.cu.o
-/usr/bin/ar q libyuezu_fps_gpu_optimized.a CMakeFiles/yuezu_fps_gpu_optimized.dir/cmake_device_link.o
-/usr/bin/ranlib libyuezu_fps_gpu_optimized.a

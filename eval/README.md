@@ -1,31 +1,36 @@
-# ns-fps Evaluation
+# 🧪 NS-FPS Evaluation
 
-This folder contains evaluation scripts for testing the latency performance of our ns-fps implementation on both CPU and GPU.
+This folder contains evaluation scripts for testing the latency performance of our ns-fps implementation on both CPU and GPU. ⚡
 
-## Hardware Requirements
+## 💻 Hardware Requirements
 
-Tests can be completed on RTX 5090 GPU.
+Tests can be completed on RTX 5090 GPU. 🚀
 
-## Setup and Execution
+## ⚙️ Setup and Execution
 
-To run the evaluation, please follow the instructions below:
+To run the evaluation, please follow the instructions below: 📋
 
-### CPU Version
+### 🖥️ CPU Version
 
 ```bash
-cd cpu/build
-rm -rf *
+cd src_cpu
+mkdir build
+cd build
 cmake ..
 make -j8
 ./compare_cpu_test_kitti -f ../../kitti_data/000000.bin -s 300000
 ```
 
-### GPU Version
+### 🎮 GPU Version
 
 ```bash
-cd gpu/build
-rm -rf *
+cd src_gpu
+mkdir build
+cd build
 cmake ..
 make -j8
 ./compare_test_kitti -f ../../kitti_data/000000.bin -s 300000
 ```
+
+---
+Made with ❤️ for performance evaluation

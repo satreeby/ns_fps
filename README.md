@@ -1,47 +1,64 @@
-# Yuezu FPS
+# 🚀 NS FPS
 
-High-performance Farthest Point Sampling (FPS) implementation based on Morton-coded neighbor search and multi-level caching.
+<p align="center">
+  <img src="figs/ns_fps.png" alt="NS FPS Visualization" width="600"/>
+</p>
 
-![image](figs/ns_fps.png)
+<div align="center">
 
-## Features
+**NS-FPS: Accelerating Farthest Point Sampling via Neighbor Search in Large-Scale Point Clouds** 💎
 
-- **Spatial Adaptivity**: Independent granularity configuration per dimension (e.g., X:32, Y:16, Z:8)
-- **Multi-Level Caching**: 16-1 tree structure for global farthest point query
-- **Incremental Update**: Only update affected spatial blocks instead of full traversal
-- **Python Binding**: Complete pybind11 interface with seamless NumPy integration
+*A high-performance Farthest Point Sampling (FPS) implementation based on Morton-coded neighbor search and multi-level caching* ⚡
 
-## Installation
+</div>
 
-### Requirements
+---
 
-- Python >= 3.7
-- NumPy
-- pybind11
-- C++17 compiler (GCC >= 7 or Clang >= 5)
+## ✨ Features
 
-### Install from Source
+- 🌍 **Spatial Adaptivity**: Independent granularity configuration per dimension (e.g., X:32, Y:16, Z:8)
+- 🌳 **Multi-Level Caching**: 16-1 tree structure for global farthest point query
+- 🔁 **Incremental Update**: Only update affected spatial blocks instead of full traversal
+- 🐍 **Python Binding**: Complete pybind11 interface with seamless NumPy integration
+- 🏆 **Outstanding Performance**: Up to **191×** Faster than naive FPS on CPU, **1.72×** than SOTA QuickFPS-CPU (under the best configuration)
+
+---
+
+## 🛠️ Installation
+
+### 📋 Requirements
+
+- 🐍 Python >= 3.7
+- 🧮 NumPy
+- 📦 pybind11
+- 🔧 C++17 compiler (GCC >= 7 or Clang >= 5)
+
+### 📥 Install from Source
 
 ```bash
-git clone https://github.com/yourusername/yuezu_fps.git
-cd yuezu_fps
+git clone https://github.com/satreeby/ns_fps.git
+cd ns_fps
 pip install -e .
 ```
 
-### Verify Installation
+### ✅ Verify Installation
 
+```bash
 python -c "import yuezu_fps.yuezu_fps_module as yf; print(yf.DEFAULT_X_BLOCKS)"
+```
 
-### Quick Start
+---
+
+## 🚀 Quick Start
 
 ```python
 import numpy as np
 import yuezu_fps.yuezu_fps_module as yf
 
-# Generate point cloud
+# 📊 Generate point cloud
 points = np.random.randn(10000, 3).astype(np.float32)
 
-# Create SpaceRange (manual range + granularity)
+# 🎯 Create SpaceRange (manual range + granularity)
 space_range = yf.make_range(
     min_x=-100, max_x=100,
     min_y=-100, max_y=100,
@@ -49,76 +66,87 @@ space_range = yf.make_range(
     x_blocks=16, y_blocks=16, z_blocks=16
 )
 
-# Execute FPS
+# ⚡ Execute FPS
 indices = yf.fps(points, n_samples=1000, range=space_range)
 
-# Get sampled points
+# 🎉 Get sampled points
 sampled_points = points[indices]
 ```
 
-You can also use `semantickitti_example.py` to verify the algorithm's performance on the real SemanticKITTI dataset.
+>You can also use `semantickitti_example.py` to verify the algorithm's performance on the real SemanticKITTI dataset. 📚
 
-## Core Concepts
+---
 
-### SpaceRange
+## 🔬 Core Concepts
+
+### 📍 SpaceRange
 
 Defines sampling space range and block granularity:
 
-| Parameter        | Type   | Description                                       |
-| ---------------- | ------ | ------------------------------------------------- |
-| `min_x`, `max_x` | float  | X-axis range                                      |
-| `min_y`, `max_y` | float  | Y-axis range                                      |
-| `min_z`, `max_z` | float  | Z-axis range                                      |
-| `x_blocks`       | uint32 | X-axis block count (power of 2, e.g., 8/16/32/64) |
-| `y_blocks`       | uint32 | Y-axis block count (power of 2, e.g., 8/16/32/64) |
-| `z_blocks`       | uint32 | Z-axis block count (power of 2, e.g., 8/16/32/64) |
+| Parameter            | Type   | Description                                       | Emoji |
+| -------------------- | ------ | ------------------------------------------------- | ----- |
+| `min_x`, `max_x` | float  | X-axis range                                      | 📏    |
+| `min_y`, `max_y` | float  | Y-axis range                                      | 📏    |
+| `min_z`, `max_z` | float  | Z-axis range                                      | 📏    |
+| `x_blocks`         | uint32 | X-axis block count (power of 2, e.g., 8/16/32/64) | 🧱    |
+| `y_blocks`         | uint32 | Y-axis block count (power of 2, e.g., 8/16/32/64) | 🧱    |
+| `z_blocks`         | uint32 | Z-axis block count (power of 2, e.g., 8/16/32/64) | 🧱    |
 
-### Morton Encoding
+### 🧮 Morton Encoding
 
-Interleaves 3D block index (ix, iy, iz) into 1D code, preserving spatial locality.
+Interleaves 3D block index (ix, iy, iz) into 1D code, preserving spatial locality. 🔄
 
-Total blocks = x_blocks × y_blocks × z_blocks
-Encoding bits = x_bits + y_bits + z_bits
+- Total blocks = x_blocks × y_blocks × z_blocks
+- Encoding bits = x_bits + y_bits + z_bits
 
-## Complete Example
+---
 
-See `example.py`:
+## 📁 Complete Example
 
-## Configuration Macros (Compile-time)
+See `example.py` for comprehensive usage! 📘
 
-| Macro               | Default | Description                              |
-| ------------------- | ------- | ---------------------------------------- |
-| `MORTON_BLOCK_SIZE` | 16      | Points per leaf block (power of 2)       |
-| `CACHE_BLOCK_SIZE`  | 16      | Cache tree branching factor (power of 2) |
-| `DEFAULT_X_BLOCKS`  | 16      | Default X granularity                    |
-| `DEFAULT_Y_BLOCKS`  | 16      | Default Y granularity                    |
-| `DEFAULT_Z_BLOCKS`  | 16      | Default Z granularity                    |
-| `BOUNDARY_EPS`      | 1e-6f   | Boundary tolerance                       |
-| `INF_DISTANCE`      | 1e30f   | Initial infinity distance                |
+---
+
+## ⚙️ Configuration Macros (Compile-time)
+
+| Macro                 | Default | Description                              | Tool |
+| --------------------- | ------- | ---------------------------------------- | ---- |
+| `MORTON_BLOCK_SIZE` | 16      | Points per leaf block (power of 2)       | ⚙️   |
+| `CACHE_BLOCK_SIZE`  | 16      | Cache tree branching factor (power of 2) | 🌳   |
+| `DEFAULT_X_BLOCKS`  | 16      | Default X granularity                    | 🧭   |
+| `DEFAULT_Y_BLOCKS`  | 16      | Default Y granularity                    | 🧭   |
+| `DEFAULT_Z_BLOCKS`  | 16      | Default Z granularity                    | 🧭   |
+| `BOUNDARY_EPS`      | 1e-6f   | Boundary tolerance                       | 📏   |
+| `INF_DISTANCE`      | 1e30f   | Initial infinity distance                | ∞    |
 
 ```bash
-# Custom compilation
+# 🛠️ Custom compilation
 g++ -O3 -std=c++17 -DMORTON_BLOCK_SIZE=32 -DCACHE_BLOCK_SIZE=32 ...
 ```
 
-## Project Structure
+---
 
-```pain
-yuezu_fps/                      # Package root
-├── example.py                  # Usage examples
-├── test.py                     # Verification tests
-├── setup.py                    # Build configuration
-├── README.md                   # This document
-├── yuezu_fps/                     # Python binding
-│   └── yuezu_fps_pybind.cpp    # pybind11 interface
-└── src/                        # Core implementation
-    ├── yuezu_fps.h             # Core header
-    └── yuezu_fps.cpp           # Core implementation
+## 🏗️ Project Structure
+
+```
+📦 yuezu_fps/
+├── 📝 example.py
+├── 📚 semantickitti_example.py
+├── 🧪 test.py
+├── 🔧 setup.py
+├── 📖 README.md
+├── 📊 eval/
+├── 🐍 yuezu_fps/
+│   └── 📄 yuezu_fps_pybind.cpp
+└── 🧠 src/
+    ├── 📄 yuezu_fps.h
+    └── 📄 yuezu_fps.cpp
 ```
 
+---
 
-## License
+## 📜 License
 
-MIT License
+⚖️ MIT License
 
-Copyright (c) 2024 Yuezu FPS Contributors
+© 2024 Yuezu FPS Contributors

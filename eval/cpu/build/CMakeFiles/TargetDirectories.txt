@@ -1,6 +1,0 @@
-/root/yuezu/src_impro/build/CMakeFiles/yuezu_fps_cpu.dir
-/root/yuezu/src_impro/build/CMakeFiles/test_cpu_fps.dir
-/root/yuezu/src_impro/build/CMakeFiles/compare_cpu_test.dir
-/root/yuezu/src_impro/build/CMakeFiles/compare_cpu_test_kitti.dir
-/root/yuezu/src_impro/build/CMakeFiles/edit_cache.dir
-/root/yuezu/src_impro/build/CMakeFiles/rebuild_cache.dir

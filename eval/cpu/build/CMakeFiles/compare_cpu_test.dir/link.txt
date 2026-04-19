@@ -1,1 +1,0 @@
-/usr/bin/c++ CMakeFiles/compare_cpu_test.dir/compare_cpu_test.cpp.o -o compare_cpu_test  libyuezu_fps_cpu.a 
