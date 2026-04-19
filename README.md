@@ -1,4 +1,4 @@
-# 🚀 NS FPS
+# 🚀 NS-FPS
 
 <p align="center">
   <img src="figs/ns_fps.png" alt="NS FPS Visualization" width="600"/>
