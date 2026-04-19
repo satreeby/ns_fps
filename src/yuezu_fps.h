@@ -58,10 +58,23 @@ struct SpaceRange {
   float min_y, max_y;
   float min_z, max_z;
   uint32_t x_blocks, y_blocks, z_blocks;
+  float inv_bs_x;
+  float inv_bs_y;
+  float inv_bs_z;
+  uint32_t x_bits_;
+  uint32_t y_bits_;
+  uint32_t z_bits_;
+  uint32_t z_shift_;
+
+  // 预计算的查找表：lut[val] = 位扩展后的值
+  std::vector<uint32_t> x_lut_;
+  std::vector<uint32_t> y_lut_;
+  std::vector<uint32_t> z_lut_;
 
   float block_size_x() const;
   float block_size_y() const;
   float block_size_z() const;
+
   uint32_t x_bits() const;
   uint32_t y_bits() const;
   uint32_t z_bits() const;

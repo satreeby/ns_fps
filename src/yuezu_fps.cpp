@@ -42,19 +42,122 @@ size_t SpaceRange::total_blocks() const {
 // =============================================================================
 // 便捷构造函数
 // =============================================================================
+static inline uint32_t _calc_bits(uint32_t blocks) {
+  uint32_t bits = 0;
+  while ((1u << bits) < blocks)
+    ++bits;
+  return bits ? bits : 1;
+}
+// 内部工具：根据 bits 生成 LUT
+static void _generate_morton_lut(uint32_t bits,
+                                 const std::vector<uint32_t> &pos_list,
+                                 std::vector<uint32_t> &lut) {
+  uint32_t count = 1u << bits;
+  lut.resize(count);
+  for (uint32_t v = 0; v < count; ++v) {
+    uint32_t code = 0;
+    for (uint32_t k = 0; k < bits; ++k) {
+      if (v & (1u << k)) {
+        code |= 1u << pos_list[k];
+      }
+    }
+    lut[v] = code;
+  }
+}
 
+// 内部工具：生成 x/y/z 每一位的目标位置（完全对齐你原来的莫顿码顺序）
+static void _compute_bit_positions(uint32_t xb, uint32_t yb, uint32_t zb,
+                                   std::vector<uint32_t> &x_pos,
+                                   std::vector<uint32_t> &y_pos,
+                                   std::vector<uint32_t> &z_pos) {
+  uint32_t bit = 0;
+  uint32_t common = std::min({xb, yb, zb});
+  uint32_t maxb = std::max({xb, yb, zb});
+
+  x_pos.clear();
+  y_pos.clear();
+  z_pos.clear();
+
+  // 阶段1：公共位段 x→y→z
+  for (uint32_t i = 0; i < common; ++i) {
+    x_pos.push_back(bit++);
+    y_pos.push_back(bit++);
+    z_pos.push_back(bit++);
+  }
+
+  // 阶段2：剩余位（保持你原来的顺序）
+  for (uint32_t i = common; i < maxb; ++i) {
+    if (i < xb)
+      x_pos.push_back(bit++);
+    if (i < yb)
+      y_pos.push_back(bit++);
+    if (i < zb)
+      z_pos.push_back(bit++);
+  }
+}
 SpaceRange make_uniform_range(float min_x, float max_x, float min_y,
                               float max_y, float min_z, float max_z,
                               uint32_t blocks_per_dim) {
-  return {min_x, max_x,          min_y,          max_y,         min_z,
-          max_z, blocks_per_dim, blocks_per_dim, blocks_per_dim};
+  const float inv_bs_x = 1.0f / ((max_x - min_x) / (float)blocks_per_dim);
+  const float inv_bs_y = 1.0f / ((max_y - min_y) / (float)blocks_per_dim);
+  const float inv_bs_z = 1.0f / ((max_z - min_z) / (float)blocks_per_dim);
+
+  const uint32_t xb = _calc_bits(blocks_per_dim);
+  const uint32_t yb = _calc_bits(blocks_per_dim);
+  const uint32_t zb = _calc_bits(blocks_per_dim);
+
+  // 构建基础结构体
+  SpaceRange range = {min_x,
+                      max_x,
+                      min_y,
+                      max_y,
+                      min_z,
+                      max_z,
+                      blocks_per_dim,
+                      blocks_per_dim,
+                      blocks_per_dim,
+                      inv_bs_x,
+                      inv_bs_y,
+                      inv_bs_z,
+                      xb,
+                      yb,
+                      zb};
+
+  // 自动生成莫顿码 LUT
+  std::vector<uint32_t> x_pos, y_pos, z_pos;
+  _compute_bit_positions(xb, yb, zb, x_pos, y_pos, z_pos);
+  _generate_morton_lut(xb, x_pos, range.x_lut_);
+  _generate_morton_lut(yb, y_pos, range.y_lut_);
+  _generate_morton_lut(zb, z_pos, range.z_lut_);
+
+  return range;
 }
 
 SpaceRange make_range(float min_x, float max_x, float min_y, float max_y,
                       float min_z, float max_z, uint32_t x_blocks,
                       uint32_t y_blocks, uint32_t z_blocks) {
-  return {min_x, max_x,    min_y,    max_y,   min_z,
-          max_z, x_blocks, y_blocks, z_blocks};
+
+  const float inv_bs_x = 1.0f / ((max_x - min_x) / (float)x_blocks);
+  const float inv_bs_y = 1.0f / ((max_y - min_y) / (float)y_blocks);
+  const float inv_bs_z = 1.0f / ((max_z - min_z) / (float)z_blocks);
+
+  const uint32_t xb = _calc_bits(x_blocks);
+  const uint32_t yb = _calc_bits(y_blocks);
+  const uint32_t zb = _calc_bits(z_blocks);
+
+  // 构建基础结构体
+  SpaceRange range = {min_x,    max_x,    min_y,    max_y,    min_z,
+                      max_z,    x_blocks, y_blocks, z_blocks, inv_bs_x,
+                      inv_bs_y, inv_bs_z, xb,       yb,       zb};
+
+  // 自动生成莫顿码 LUT
+  std::vector<uint32_t> x_pos, y_pos, z_pos;
+  _compute_bit_positions(xb, yb, zb, x_pos, y_pos, z_pos);
+  _generate_morton_lut(xb, x_pos, range.x_lut_);
+  _generate_morton_lut(yb, y_pos, range.y_lut_);
+  _generate_morton_lut(zb, z_pos, range.z_lut_);
+
+  return range;
 }
 
 // =============================================================================
@@ -70,12 +173,17 @@ Point3D::compute_block_indices(const SpaceRange &range) const {
   float cy = std::max(range.min_y, std::min(y, range.max_y - BOUNDARY_EPS));
   float cz = std::max(range.min_z, std::min(z, range.max_z - BOUNDARY_EPS));
 
-  uint32_t ix =
-      static_cast<uint32_t>((cx - range.min_x) / range.block_size_x());
-  uint32_t iy =
-      static_cast<uint32_t>((cy - range.min_y) / range.block_size_y());
-  uint32_t iz =
-      static_cast<uint32_t>((cz - range.min_z) / range.block_size_z());
+  // 建议 SpaceRange 预存逆元，将除法转乘法
+  uint32_t ix = static_cast<uint32_t>((cx - range.min_x) * range.inv_bs_x);
+  uint32_t iy = static_cast<uint32_t>((cy - range.min_y) * range.inv_bs_y);
+  uint32_t iz = static_cast<uint32_t>((cz - range.min_z) * range.inv_bs_z);
+
+  // uint32_t ix =
+  //     static_cast<uint32_t>((cx - range.min_x) / range.block_size_x());
+  // uint32_t iy =
+  //     static_cast<uint32_t>((cy - range.min_y) / range.block_size_y());
+  // uint32_t iz =
+  //     static_cast<uint32_t>((cz - range.min_z) / range.block_size_z());
 
   ix = std::min(ix, range.x_blocks - 1);
   iy = std::min(iy, range.y_blocks - 1);
@@ -87,30 +195,7 @@ Point3D::compute_block_indices(const SpaceRange &range) const {
 uint32_t Point3D::compute_morton_code(const SpaceRange &range) const {
   auto [ix, iy, iz] = compute_block_indices(range);
 
-  uint32_t xb = range.x_bits();
-  uint32_t yb = range.y_bits();
-  uint32_t zb = range.z_bits();
-  uint32_t max_bits = std::max({xb, yb, zb});
-
-  uint32_t code = 0;
-  uint32_t bit_pos = 0;
-
-  for (uint32_t i = 0; i < max_bits; ++i) {
-    if (i < xb) {
-      code |= ((ix >> i) & 1u) << bit_pos;
-      ++bit_pos;
-    }
-    if (i < yb) {
-      code |= ((iy >> i) & 1u) << bit_pos;
-      ++bit_pos;
-    }
-    if (i < zb) {
-      code |= ((iz >> i) & 1u) << bit_pos;
-      ++bit_pos;
-    }
-  }
-
-  return code;
+  return range.x_lut_[ix] | range.y_lut_[iy] | range.z_lut_[iz];
 }
 
 // =============================================================================
@@ -513,29 +598,11 @@ MortonStructure::get_morton_codes_in_range(float qx, float qy, float qz,
 
 uint32_t MortonStructure::encode_block(uint32_t x, uint32_t y,
                                        uint32_t z) const {
-  uint32_t xb = range_.x_bits();
-  uint32_t yb = range_.y_bits();
-  uint32_t zb = range_.z_bits();
-  uint32_t max_bits = std::max({xb, yb, zb});
 
-  uint32_t code = 0;
-  uint32_t bit_pos = 0;
-
-  for (uint32_t i = 0; i < max_bits; ++i) {
-    if (i < xb) {
-      code |= ((x >> i) & 1u) << bit_pos;
-      ++bit_pos;
-    }
-    if (i < yb) {
-      code |= ((y >> i) & 1u) << bit_pos;
-      ++bit_pos;
-    }
-    if (i < zb) {
-      code |= ((z >> i) & 1u) << bit_pos;
-      ++bit_pos;
-    }
-  }
-  return code;
+  // uint32_t xb = range_.x_bits_;
+  // uint32_t yb = range_.y_bits_;
+  // uint32_t zb = range_.z_bits_;
+  return range_.x_lut_[x] | range_.y_lut_[y] | range_.z_lut_[z];
 }
 
 void MortonStructure::propagate_updates_upward(
