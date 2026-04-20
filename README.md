@@ -20,7 +20,7 @@
 - 🌳 **Multi-Level Caching**: 16-1 tree structure for global farthest point query
 - 🔁 **Incremental Update**: Only update affected spatial blocks instead of full traversal
 - 🐍 **Python Binding**: Complete pybind11 interface with seamless NumPy integration
-- 🏆 **Outstanding Performance**: Up to **191×** Faster than naive FPS on CPU, **1.72×** than SOTA QuickFPS-CPU (under the best configuration)
+- 🏆 **Outstanding Performance**: Up to **191×** Faster than naive FPS on CPU, **1.72×** than SOTA QuickFPS-CPU, **4.2×** than naive FPS on GPU (under the best configuration)
 
 ---
 
