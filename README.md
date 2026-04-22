@@ -1,7 +1,7 @@
 # 🚀 NS-FPS
 
 <p align="center">
-  <img src="figs/ns_fps.png" alt="NS FPS Visualization" width="600"/>
+  <img src="figs/ns-fps.png" alt="NS FPS Visualization" width="600"/>
 </p>
 
 <div align="center">
