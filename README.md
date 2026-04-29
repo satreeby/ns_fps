@@ -6,7 +6,7 @@
 
 <div align="center">
 
-**NS-FPS: Accelerating Farthest Point Sampling via Neighbor Search in Large-Scale Point Clouds** 💎
+**NS-FPS: Accelerating Farthest Point Sampling via Neighbor Search in Large-Scale Point Clouds [ISCA 2026]** 💎
 
 *Yuezu-fps: A high-performance and lossless Farthest Point Sampling (FPS) implementation based on Morton-coded neighbor search and multi-level caching, the CPU version of NS-FPS* ⚡
 
