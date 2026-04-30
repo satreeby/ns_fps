@@ -36,8 +36,8 @@
 ### 📥 Install from Source
 
 ```bash
-git clone https://github.com/satreeby/ns_fps.git
-cd ns_fps
+git clone https://github.com/satreeby/ns-fps.git
+cd ns-fps
 pip install -e .
 ```
 
